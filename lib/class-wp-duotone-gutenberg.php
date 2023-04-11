@@ -898,26 +898,22 @@ class WP_Duotone_Gutenberg {
 
 		// Enqueue the pieces needed for rendering a duotone to the page.
 		if ( $has_duotone_attribute ) {
-
 			// Possible values for duotone attribute:
 			// 1. Array of colors - e.g. array('#000000', '#ffffff').
 			// 2. Variable for an existing Duotone preset - e.g. 'var:preset|duotone|green-blue' or 'var(--wp--preset--duotone--green-blue)''
 			// 3. A CSS string - e.g. 'unset' to remove globally applied duotone.
-
 			$duotone_attr = $block['attrs']['style']['color']['duotone'];
 			$is_preset    = is_string( $duotone_attr ) && self::is_preset( $duotone_attr );
 			$is_css       = is_string( $duotone_attr ) && ! $is_preset;
 			$is_custom    = is_array( $duotone_attr );
 
 			if ( $is_preset ) {
-
 				$slug         = self::gutenberg_get_slug_from_attr( $duotone_attr ); // e.g. 'green-blue'.
 				$filter_id    = self::get_filter_id( $slug ); // e.g. 'wp-duotone-filter-green-blue'.
 				$filter_value = self::get_css_var( $slug ); // e.g. 'var(--wp--preset--duotone--green-blue)'.
 
 				// CSS custom property, SVG filter, and block CSS.
 				self::enqueue_global_styles_preset( $filter_id, $duotone_selector, $filter_value );
-
 			} elseif ( $is_css ) {
 				$slug         = wp_unique_id( sanitize_key( $duotone_attr . '-' ) ); // e.g. 'unset-1'.
 				$filter_id    = self::get_filter_id( $slug ); // e.g. 'wp-duotone-filter-unset-1'.
