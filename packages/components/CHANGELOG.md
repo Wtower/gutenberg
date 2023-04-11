@@ -12,6 +12,7 @@
 
 -   `DropZone`: Smooth animation ([#49517](https://github.com/WordPress/gutenberg/pull/49517)).
 -   `Navigator`: Add `skipFocus` property in `NavigateOptions`. ([#49350](https://github.com/WordPress/gutenberg/pull/49350)).
+-   Export `IconType` type for external use. ([#49649](https://github.com/WordPress/gutenberg/pull/49649))
 
 ## 23.7.0 (2023-03-29)
 
