@@ -896,7 +896,7 @@ class WP_Duotone_Gutenberg {
 			return $block_content;
 		}
 
-		// Generate the pieces needed for rendering a duotone to the page.
+		// Enqueue the pieces needed for rendering a duotone to the page.
 		if ( $has_duotone_attribute ) {
 
 			// Possible values for duotone attribute:
