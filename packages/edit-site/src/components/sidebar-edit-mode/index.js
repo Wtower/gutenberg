@@ -1,7 +1,7 @@
 /**
  * WordPress dependencies
  */
-import { createSlotFill, PanelBody } from '@wordpress/components';
+import { createSlotFill } from '@wordpress/components';
 import { isRTL, __ } from '@wordpress/i18n';
 import { drawerLeft, drawerRight } from '@wordpress/icons';
 import { useEffect, Fragment } from '@wordpress/element';
@@ -16,9 +16,10 @@ import DefaultSidebar from './default-sidebar';
 import GlobalStylesSidebar from './global-styles-sidebar';
 import { STORE_NAME } from '../../store/constants';
 import SettingsHeader from './settings-header';
-import TemplateCard from './template-card';
+import TemplatePanel from './template-panel';
 import { SIDEBAR_BLOCK, SIDEBAR_TEMPLATE } from './constants';
 import { store as editSiteStore } from '../../store';
+import PagePanels from './page-panels';
 
 const { Slot: InspectorSlot, Fill: InspectorFill } = createSlotFill(
 	'EditSiteSidebarInspector'
@@ -31,6 +32,7 @@ export function SidebarComplementaryAreaFills() {
 		isEditorSidebarOpened,
 		hasBlockSelection,
 		supportsGlobalStyles,
+		hasPageContentLock,
 	} = useSelect( ( select ) => {
 		const _sidebar =
 			select( interfaceStore ).getActiveComplementaryArea( STORE_NAME );
@@ -45,6 +47,7 @@ export function SidebarComplementaryAreaFills() {
 			hasBlockSelection:
 				!! select( blockEditorStore ).getBlockSelectionStart(),
 			supportsGlobalStyles: ! settings?.supportsTemplatePartsMode,
+			hasPageContentLock: select( editSiteStore ).hasPageContentLock(),
 		};
 	}, [] );
 	const { enableComplementaryArea } = useDispatch( interfaceStore );
@@ -73,11 +76,12 @@ export function SidebarComplementaryAreaFills() {
 				header={ <SettingsHeader sidebarName={ sidebarName } /> }
 				headerClassName="edit-site-sidebar-edit-mode__panel-tabs"
 			>
-				{ sidebarName === SIDEBAR_TEMPLATE && (
-					<PanelBody>
-						<TemplateCard />
-					</PanelBody>
-				) }
+				{ sidebarName === SIDEBAR_TEMPLATE &&
+					( hasPageContentLock ? (
+						<PagePanels />
+					) : (
+						<TemplatePanel />
+					) ) }
 				{ sidebarName === SIDEBAR_BLOCK && (
 					<InspectorSlot bubblesVirtually />
 				) }

@@ -68,12 +68,13 @@ export default function Layout() {
 	const { params } = useLocation();
 	const isListPage = getIsListPage( params );
 	const isEditorPage = ! isListPage;
-	const { canvasMode, previousShortcut, nextShortcut } = useSelect(
-		( select ) => {
+	const { canvasMode, previousShortcut, nextShortcut, hasPageContentLock } =
+		useSelect( ( select ) => {
 			const { getAllShortcutKeyCombinations } = select(
 				keyboardShortcutsStore
 			);
-			const { getCanvasMode } = unlock( select( editSiteStore ) );
+			const { getCanvasMode, hasPageContentLock: _hasPageContentLock } =
+				unlock( select( editSiteStore ) );
 			return {
 				canvasMode: getCanvasMode(),
 				previousShortcut: getAllShortcutKeyCombinations(
@@ -82,10 +83,9 @@ export default function Layout() {
 				nextShortcut: getAllShortcutKeyCombinations(
 					'core/edit-site/next-region'
 				),
+				hasPageContentLock: _hasPageContentLock(),
 			};
-		},
-		[]
-	);
+		}, [] );
 	const navigateRegionsProps = useNavigateRegions( {
 		previous: previousShortcut,
 		next: nextShortcut,
@@ -139,6 +139,7 @@ export default function Layout() {
 					{
 						'is-full-canvas': isFullCanvas,
 						'is-edit-mode': canvasMode === 'edit',
+						'has-page-content-lock': hasPageContentLock,
 					}
 				) }
 			>

@@ -1662,24 +1662,47 @@ export function canInsertBlocks( state, clientIds, rootClientId = null ) {
  *
  * @return {boolean} Whether the given block is allowed to be removed.
  */
-export function canRemoveBlock( state, clientId, rootClientId = null ) {
-	const attributes = getBlockAttributes( state, clientId );
+export const canRemoveBlock = createSelector(
+	( state, clientId, rootClientId = null ) => {
+		const attributes = getBlockAttributes( state, clientId );
 
-	// attributes can be null if the block is already deleted.
-	if ( attributes === null ) {
+		// attributes can be null if the block is already deleted.
+		if ( attributes === null ) {
+			return true;
+		}
+
+		// If the block has a lock defined on it, we use that.
+		const { lock } = attributes;
+		if ( lock !== undefined && lock?.remove !== undefined ) {
+			// When remove is true, it means we cannot remove it.
+			return ! lock?.remove;
+		}
+
+		const templateLock = getTemplateLock( state, rootClientId );
+		if ( templateLock === 'contentBlocksOnly' ) {
+			// Allow only designated content blocks to be removed.
+			return getBlockParents( state, clientId ).some( ( parent ) =>
+				state.settings.contentBlockTypes.includes(
+					getBlockName( state, parent )
+				)
+			);
+		} else if ( templateLock ) {
+			// Prevent removal when template lock exists.
+			return false;
+		}
+
+		// Permit removing by default.
 		return true;
-	}
-
-	const { lock } = attributes;
-	const parentIsLocked = !! getTemplateLock( state, rootClientId );
-	// If we don't have a lock on the blockType level, we defer to the parent templateLock.
-	if ( lock === undefined || lock?.remove === undefined ) {
-		return ! parentIsLocked;
-	}
-
-	// When remove is true, it means we cannot remove it.
-	return ! lock?.remove;
-}
+	},
+	( state, clientId, rootClientId = null ) => [
+		state.blocks.byClientId.get( clientId ),
+		state.blockListSettings[ rootClientId ],
+		state.settings.templateLock,
+		state.hasContentFocus,
+		state.settings.contentBlockTypes,
+		state.blocks.parents,
+	]
+);
 
 /**
  * Determines if the given blocks are allowed to be removed.
@@ -1705,22 +1728,45 @@ export function canRemoveBlocks( state, clientIds, rootClientId = null ) {
  *
  * @return {boolean | undefined} Whether the given block is allowed to be moved.
  */
-export function canMoveBlock( state, clientId, rootClientId = null ) {
-	const attributes = getBlockAttributes( state, clientId );
-	if ( attributes === null ) {
-		return;
-	}
+export const canMoveBlock = createSelector(
+	( state, clientId, rootClientId = null ) => {
+		const attributes = getBlockAttributes( state, clientId );
+		if ( attributes === null ) {
+			return;
+		}
 
-	const { lock } = attributes;
-	const parentIsLocked = getTemplateLock( state, rootClientId ) === 'all';
-	// If we don't have a lock on the blockType level, we defer to the parent templateLock.
-	if ( lock === undefined || lock?.move === undefined ) {
-		return ! parentIsLocked;
-	}
+		// If the block has a lock defined on it, we use that.
+		const { lock } = attributes;
+		if ( lock !== undefined && lock?.move !== undefined ) {
+			// When move is true, it means we cannot move it.
+			return ! lock?.move;
+		}
 
-	// When move is true, it means we cannot move it.
-	return ! lock?.move;
-}
+		const templateLock = getTemplateLock( state, rootClientId );
+		if ( templateLock === 'all' ) {
+			// Prevent moving when template lock is 'all'.
+			return false;
+		} else if ( templateLock === 'contentBlocksOnly' ) {
+			// Allow only designated content blocks to be moved.
+			return getBlockParents( state, clientId ).some( ( parent ) =>
+				state.settings.contentBlockTypes.includes(
+					getBlockName( state, parent )
+				)
+			);
+		}
+
+		// Permit moving by default.
+		return true;
+	},
+	( state, clientId, rootClientId ) => [
+		state.blocks.byClientId.get( clientId ),
+		state.blockListSettings[ rootClientId ],
+		state.settings.templateLock,
+		state.hasContentFocus,
+		state.settings.contentBlockTypes,
+		state.blocks.parents,
+	]
+);
 
 /**
  * Determines if the given blocks are allowed to be moved.
@@ -1745,17 +1791,54 @@ export function canMoveBlocks( state, clientIds, rootClientId = null ) {
  *
  * @return {boolean} Whether the given block is allowed to be edited.
  */
-export function canEditBlock( state, clientId ) {
-	const attributes = getBlockAttributes( state, clientId );
-	if ( attributes === null ) {
+export const canEditBlock = createSelector(
+	( state, clientId ) => {
+		const attributes = getBlockAttributes( state, clientId );
+		if ( attributes === null ) {
+			return true;
+		}
+
+		// If the block has a lock defined on it, we use that.
+		const { lock } = attributes;
+		if ( lock !== undefined && lock?.edit !== undefined ) {
+			// When the edit is true, we cannot edit the block.
+			return ! lock?.edit;
+		}
+
+		const templateLock = getTemplateLock( state, clientId );
+		if ( templateLock === 'contentBlocksOnly' ) {
+			// Prevent editing if:
+			return (
+				// Block is not a content block, or;
+				state.settings.contentBlockTypes.includes(
+					getBlockName( state, clientId )
+				) ||
+				// Block is not within a content block, or;
+				getBlockParents( state, clientId ).some( ( parent ) =>
+					state.settings.contentBlockTypes.includes(
+						getBlockName( state, parent )
+					)
+				) ||
+				// Block is not a parent of a content block.
+				getClientIdsOfDescendants( state, [ clientId ] ).some(
+					( descendant ) =>
+						state.settings.contentBlockTypes.includes(
+							getBlockName( state, descendant )
+						)
+				)
+			);
+		}
+
+		// Permit edit by default.
 		return true;
-	}
-
-	const { lock } = attributes;
-
-	// When the edit is true, we cannot edit the block.
-	return ! lock?.edit;
-}
+	},
+	( state, clientId ) => [
+		state.blocks.byClientId.get( clientId ),
+		state.hasContentFocus,
+		state.settings.contentBlockTypes,
+		state.blocks.parents,
+	]
+);
 
 /**
  * Determines if the given block type can be locked/unlocked by a user.
