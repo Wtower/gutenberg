@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### Internal
+
+-   Move `RichTextValue` types to the rich-text package ([#49651](https://github.com/WordPress/gutenberg/pull/49651))
+
 ## 23.8.0 (2023-04-12)
 
 ### Internal
