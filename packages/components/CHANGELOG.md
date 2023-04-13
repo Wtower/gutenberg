@@ -14,7 +14,7 @@
 -   `Navigator`: Add `skipFocus` property in `NavigateOptions`. ([#49350](https://github.com/WordPress/gutenberg/pull/49350)).
 
 ## 23.7.0 (2023-03-29)
--   `TEST`: TEST ([#9876](https://github.com/WordPress/gutenberg/pull/9876)).
+-   `TEST`: TEST ([#49780](https://github.com/WordPress/gutenberg/pull/49780)).
 
 ### Internal
 
