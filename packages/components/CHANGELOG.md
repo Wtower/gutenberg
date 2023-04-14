@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### Internal
+
+-   `Navigation`: Make sure `NavigationMenu` and `NavigationGroup` don't render an empty `aria-labelledby` attribute ([#42495](https://github.com/WordPress/gutenberg/pull/42495)).
+
 ## 23.8.0 (2023-04-12)
 
 ### Internal
