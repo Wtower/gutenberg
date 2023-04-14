@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### Enhancements
+
+-   `SlotFill`: Updated to allow Symbol keys not only string names ([#49819](https://github.com/WordPress/gutenberg/pull/49819)).
+
 ## 23.8.0 (2023-04-12)
 
 ### Internal
